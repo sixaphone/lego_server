@@ -13,8 +13,6 @@ an account with sudo permissions
 
 Clone the repository using `git cli` or a GUI tool.
 
-<br>
-
 ### Folder structure
 
 ```
@@ -71,12 +69,7 @@ Clone the repository using `git cli` or a GUI tool.
       module: php
   ``` 
 
-<br>
-
 --- 
-
-<br>
-
 
 ## Defining bricks
 
@@ -198,13 +191,7 @@ class ApacheMysqlUbuntu20(Brick):
 
 Here we defined two bricks in a file we call `mysql_apache.py`, the bricks can be defined in their separate folder ofc. Using brick builder we can provide a config object to instantiate a command like we would in yml files. After that, we need to override the `run` method to execute the run methods of its containing bricks.
 
-
-
-<br>
-
 --- 
-
-<br>
 
 ## Usage
 <br>
@@ -217,11 +204,7 @@ Here we defined two bricks in a file we call `mysql_apache.py`, the bricks can b
       
       Example: `python main.py --file lamp.yml`
 
-<br>
-
 --- 
-
-<br>
 
 ## Contributing
 
@@ -229,12 +212,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 Prefer to use conventional commits for your branches and messages.
 
-<br>
-
 --- 
-
-<br>
-
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
