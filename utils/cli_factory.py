@@ -1,7 +1,6 @@
-from .cli import CLI
+from utils.cli import CLI
 
 
 class CLIFactory:
-
-  def create_cli(self):
-    return CLI()
+    def create_cli(self):
+        return CLI()

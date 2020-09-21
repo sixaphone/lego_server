@@ -1,8 +1,9 @@
 from utils.executor import Executor
 import argparse
 from os import path, getcwd
-from bricks.apache import ApacheUbuntu20
 import yaml
+import sys
+from bricks import *
 
 
 def get_file():
