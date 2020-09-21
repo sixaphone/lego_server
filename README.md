@@ -90,15 +90,7 @@ class Brick(ABC):
         self.description = description
         self.cli = cli
 
-    def __str__(self):
-        return f"{self.name}: {self.description}"
-
-    def run(self):
-        for cmd in self._commands:
-            print(self.cli.run_command(cmd))
-
-    def update_env(self, overrides):
-        self._env = {**self._env, **overrides}
+    # ... rest methods
 
 ```
 
@@ -166,7 +158,7 @@ class ApacheMysqlUbuntu20(Brick):
             {
                 "name": "Apache2",
                 "description": "Install Apache2",
-                "module": "apache_mysql",
+                "module": "apache",
                 "class": "ApacheUbuntu20",
             }
         ),
@@ -174,7 +166,7 @@ class ApacheMysqlUbuntu20(Brick):
             {
                 "name": "Mysql",
                 "description": "Install Mysql",
-                "module": "apache_mysql",
+                "module": "mysql",
                 "class": "MysqlUbuntu20",
             }
         ),
@@ -183,13 +175,18 @@ class ApacheMysqlUbuntu20(Brick):
     def __init__(self, name, description, cli):
         super(ApacheMysqlUbuntu20, self).__init__(name, description, cli)
 
-    def run(self):
-        for brick in self._commands:
-            brick.run()
-
 ```
 
-Here we defined two bricks in a file we call `mysql_apache.py`, the bricks can be defined in their separate folder ofc. Using brick builder we can provide a config object to instantiate a command like we would in yml files. After that, we need to override the `run` method to execute the run methods of its containing bricks.
+Here we defined two bricks in a file we call `apache_mysql.py`, the bricks can be defined in their separate folder ofc. Using brick builder we can provide a config object to instantiate a command like we would in yml files. In our build `yml` file we would define a step:
+
+```yaml
+  - name: Apache and Mysql 
+    description: Install Apache and Mysql
+    class: ApacheMysqlUbuntu20
+    module: apache_mysql
+```
+
+The base `run` method will determin if we are running a brick or command and based on that execute cli command or the bricks run method.
 
 --- 
 

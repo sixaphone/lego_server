@@ -1,4 +1,4 @@
-from .brick_builder import BrickBuilder
+from utils.brick_builder import BrickBuilder
 
 
 class Executor:

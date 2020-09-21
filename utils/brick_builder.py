@@ -1,5 +1,5 @@
-from .cli import CLI
-from .cli_factory import CLIFactory
+from utils.cli import CLI
+from utils.cli_factory import CLIFactory
 
 
 class BrickBuilder:
