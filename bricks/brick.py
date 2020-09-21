@@ -20,8 +20,8 @@ class Brick(ABC):
                 step.run()
             elif isinstance(step, str):
                 print(self.cli.run_command(step))
-
-            raise Exception("Unable to run step: " + str(step))
+            else:
+                raise Exception("Unable to run step: " + str(step))
 
     def update_env(self, overrides):
         self._env = {**self._env, **overrides}
