@@ -1,30 +1,28 @@
 import subprocess
+from invoke import run
 
 
 class CLI:
     def run_command(self, command):
         try:
-            chunked_command = None
+            cmd = None
 
             if isinstance(command, str):
-                chunked_command = command.split()
+                cmd = command
 
             if isinstance(command, list):
-                chunked_command = command
+                cmd = " ".join(command)
 
-            if not chunked_command:
+            if not cmd:
                 raise Exception("Invalid command.")
 
-            proccess = subprocess.Popen(
-                chunked_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-            )
+            try:
+                result = run(cmd)
+            except Exception as e:
+                print(e)
+                raise Exception("Error on command " + cmd)
 
-            stdout, stderr = proccess.communicate()
-
-            if stderr:
-                raise Exception("Error on command " + " ".join(chunked_command))
-
-            return stdout
+            return result
         except Exception as e:
             print(str(e))
             exit()
