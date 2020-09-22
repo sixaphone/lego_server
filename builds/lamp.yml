@@ -1,26 +1,26 @@
 build_set: "LAMP stack deployment setup"
 bricks:
-  # - name: Apache
-  #   description: Install apache2 on ubuntu 20
-  #   class: ApacheUbuntu20
-  #   module: apache
+  - name: Apache
+    description: Install apache2 on ubuntu 20
+    class: ApacheUbuntu20
+    module: apache
 
   - name: UFW
     description: Setup UFW rules
     class: UFW
     module: ufw
 
-  # - name: Mysql 
-  #   description: Install mysql server
-  #   class: MysqlUbuntu20
-  #   module: mysql
+  - name: Mysql 
+    description: Install mysql server
+    class: MysqlUbuntu20
+    module: mysql
 
-  # - name: Mysql Secure
-  #   description: Run mysql_secure_installation
-  #   class: MysqlSecureUbuntu20
-  #   module: mysql_secure
+  - name: Mysql Secure
+    description: Run mysql_secure_installation
+    class: MysqlSecureUbuntu20
+    module: mysql_secure
 
-  # - name: PHP7.2
-  #   description: Install php7.2 and deps
-  #   class: Php72Ubuntu20
-  #   module: php
+  - name: PHP7.2
+    description: Install php7.2 and deps
+    class: Php72Ubuntu20
+    module: php
