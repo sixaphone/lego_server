@@ -1,4 +1,5 @@
 from utils.brick_builder import BrickBuilder
+from fabric import Connection
 
 
 class Executor:

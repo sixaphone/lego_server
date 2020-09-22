@@ -1,5 +1,5 @@
-from .brick import Brick
-from brick_path import brick_path
+from bricks.brick import Brick
+from bricks.brick_path import brick_path
 
 
 class Php72Ubuntu20(Brick):

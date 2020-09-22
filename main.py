@@ -1,27 +1,21 @@
 from utils.executor import Executor
-import argparse
-from os import path, getcwd
-import yaml
-import sys
+from utils.build_schema import build_schema
+from utils.arg_reader import ArgReader
+from utils.yaml_parser import YamlParser
 from bricks import *
 
 
-def get_file():
-    arg_parser = argparse.ArgumentParser(description="Run pipeline")
-    arg_parser.add_argument(
-        "--file", required=True, type=str, help="Config file to load pipeline"
-    )
-    arguments = arg_parser.parse_args()
-
-    return path.join(getcwd(), "builds", arguments.file)
+def main(arg_reader, yaml_parser):
+    config_file = arg_reader.get_file()
+    config = yaml_parser.parse(config_file)
+    # executor = Executor()
+    # executor.build_brickset(config)
+    # executor.run()
 
 
 if __name__ == "__main__":
-    config_file = get_file()
-    config = None
-    with open(config_file, "r") as stream:
-        config = yaml.safe_load(stream)
-
-    executor = Executor()
-    executor.build_brickset(config)
-    executor.run()
+    try:
+        main(ArgReader(), YamlParser())
+    except Exception as e:
+        print(str(e))
+        exit(1)
