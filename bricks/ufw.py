@@ -1,10 +1,10 @@
 from .brick import Brick
+from bricks.brick_path import brick_path
 
 
 class UFW(Brick):
     _commands = [
-        'ufw allow in "Apache Full"' 'ufw allow in "OpenSSH"',
-        "ufw enable",
+        brick_path("scripts/ufw.sh"),
     ]
 
     def __init__(self, name, description, cli):

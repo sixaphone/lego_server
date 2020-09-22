@@ -1,11 +1,11 @@
 from bricks.brick import Brick
-from os import path, getcwd
+from bricks.brick_path import brick_path
 
 
 class ApacheUbuntu20(Brick):
     _commands = [
         "apt install apache2 -y",
-        f'cp {path.join(path.dirname(path.realpath(__file__)), "config/apache2.conf")} /etc/apache2/apache2.conf',
+        f'cp {brick_path("config/apache2.conf")} /etc/apache2/apache2.conf',
     ]
 
     def __init__(self, name, description, cli):
