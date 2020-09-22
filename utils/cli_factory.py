@@ -2,5 +2,6 @@ from utils.cli import CLI
 
 
 class CLIFactory:
-    def create_cli(self):
+    @staticmethod
+    def create_cli():
         return CLI()

@@ -1,28 +1,21 @@
-import subprocess
 from invoke import run
 
 
 class CLI:
     def run_command(self, command):
+        cmd = self.parse_command(command)
+
         try:
-            cmd = None
-
-            if isinstance(command, str):
-                cmd = command
-
-            if isinstance(command, list):
-                cmd = " ".join(command)
-
-            if not cmd:
-                raise Exception("Invalid command.")
-
-            try:
-                result = run(cmd)
-            except Exception as e:
-                print(e)
-                raise Exception("Error on command " + cmd)
-
-            return result
+            return run(cmd)
         except Exception as e:
-            print(str(e))
-            exit()
+            print(e)
+            raise Exception("Error on command " + str(cmd))
+
+    def parse_command(self, raw):
+        if isinstance(raw, str):
+            return raw
+
+        if isinstance(raw, list):
+            return " ".join(raw)
+
+        raise Exception("Invalid command: " + str(raw))
