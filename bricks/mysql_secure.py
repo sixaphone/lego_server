@@ -1,4 +1,4 @@
-from .brick import Brick
+from bricks.brick import Brick
 
 
 class MysqlSecureUbuntu20(Brick):

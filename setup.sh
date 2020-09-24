@@ -20,3 +20,5 @@ setup_env () {
 }
 
 setup_env
+
+chown -R $1:$1 $PWD/venv 
