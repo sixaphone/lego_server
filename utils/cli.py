@@ -1,15 +1,11 @@
 from invoke import run
+from abc import ABC, abstractmethod
 
 
-class CLI:
+class CLI(ABC):
+    @abstractmethod
     def run_command(self, command):
-        cmd = self.parse_command(command)
-
-        try:
-            return run(cmd)
-        except Exception as e:
-            print(e)
-            raise Exception("Error on command " + str(cmd))
+        pass
 
     def parse_command(self, raw):
         if isinstance(raw, str):

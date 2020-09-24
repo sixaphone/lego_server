@@ -1,10 +1,11 @@
 from bricks.brick import Brick
-from bricks.brick_path import brick_path
+from os.path import join
+from settings import REMOTE_SCRIPT_DIR
 
 
 class Php72Ubuntu20(Brick):
     _commands = [
-        brick_path("scripts/php7_2.sh"),
+        join(REMOTE_SCRIPT_DIR, "php7_2.sh"),
     ]
 
     def __init__(self, name, description, cli):

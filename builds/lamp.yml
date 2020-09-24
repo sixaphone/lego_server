@@ -1,10 +1,15 @@
 build_set: LAMP stack deployment setup
+
 connection:
   name: default
   auth_type: password
-  password: password
+  password: ee885d3b2be340f0e304e11a53
   host: 46.101.106.60
-  user: meta5
+  user: root
+  watchers:
+    - pattern: '\[sudo\] password:'
+      response: ee885d3b2be340f0e304e11a53
+
 bricks:
   - name: Apache
     description: Install apache2 on ubuntu 20

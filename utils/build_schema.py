@@ -14,6 +14,17 @@ connection_schema = {
         "key_file": {
             "type": "string",
         },
+        "watchers": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["pattern", "response"],
+                "properties": {
+                    "pattern": {"type": "string"},
+                    "response": {"type": "string"},
+                },
+            },
+        },
     },
 }
 

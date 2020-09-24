@@ -1,10 +1,11 @@
-from .brick import Brick
-from bricks.brick_path import brick_path
+from bricks.brick import Brick
+from os.path import join
+from settings import REMOTE_SCRIPT_DIR
 
 
 class UFW(Brick):
     _commands = [
-        brick_path("scripts/ufw.sh"),
+        join(REMOTE_SCRIPT_DIR, "ufw.sh"),
     ]
 
     def __init__(self, name, description, cli):
