@@ -1,4 +1,5 @@
 from abc import ABC
+from jinja2 import Environment
 
 
 class Brick(ABC):
@@ -10,6 +11,7 @@ class Brick(ABC):
         self.name = name
         self.description = description
         self.cli = cli
+        self.jinja = Environment(autoescape=True)
 
     def __str__(self):
         return f"{self.name}: {self.description}"
@@ -22,7 +24,8 @@ class Brick(ABC):
             if isinstance(step, Brick):
                 step.run()
             elif isinstance(step, str):
-                print(self.cli.run_command(step))
+                parsed = self.jinja.from_string(step).render(self._env)
+                print(self.cli.run_command(parsed))
             else:
                 raise Exception("Unable to run step: " + str(step))
         print("\n")

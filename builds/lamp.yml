@@ -30,6 +30,8 @@ bricks:
     description: Run mysql_secure_installation
     class: MysqlSecureUbuntu20
     module: mysql_secure
+    env:
+      MYSQL_ROOT_PASSWORD: SuperSecurePassword
 
   - name: PHP7.2
     description: Install php7.2 and deps

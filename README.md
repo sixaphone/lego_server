@@ -6,12 +6,32 @@ A plug and play structure to automate your server deployment. Build a set of bri
 
 ```
 python >= 3.6.2
-an account with sudo permissions
+pip >= 3
+git
 ```
 
 ### Installation
 
-Clone the repository using `git cli` or a GUI tool.
+Clone the repository using `git cli` or a GUI tool and open the directory.
+
+```bash
+git clone https://github.com/sixaphone/lego_server.git
+cd lego_server
+```
+
+Run the `setup.sh` script.
+
+```sh
+sudo ./setup.sh $USER
+```
+
+The script needs to be executed as a sudo user, but in order to have access to venv we pass our current `$USER` as an argument and the script will set him as the owner.
+
+Then activate the virtualenv
+
+```sh
+source ./venv/bin/activate
+```
 
 ### Folder structure
 
@@ -29,6 +49,8 @@ Clone the repository using `git cli` or a GUI tool.
 
   You can also use predefined configurations and files such as `apache2.conf` to include during your pipeline. They are stored in the `config` folder.
 
+  If some step requires more complex bash operations you can make a script file for it in the `scripts` folder and it will be executed remotely.
+
 - `utils`
 
   Here lie helper classes and methods such as the main executor, cli helper, and cli factory.
@@ -39,12 +61,31 @@ Clone the repository using `git cli` or a GUI tool.
 
 
   ```yaml
-  build_set: "LAMP stack deployment setup"
+  build_set: LAMP stack deployment setup
+
+  connection:
+    name: default # custom name
+    auth_type: password # supports password and key (ssh key)
+    password: ee885d3b2be340f0e304e11a53 # required for sudo access
+    host: 46.101.106.60 # host ip or dns 
+    user: root # user with sudo privileges
+    # optional array of watchers used by fabric. Consult fabric docs for more info
+    watchers: 
+      - pattern: '\[sudo\] password:'
+        response: ee885d3b2be340f0e304e11a53
+
   bricks:
     - name: Apache
       description: Install apache2 on ubuntu 20
       class: ApacheUbuntu20
       module: apache
+      # define custom connection for specific step
+      connection:
+          name: apache
+          auth_type: password
+          password: pass
+          host: 46.101.106.61 
+          user: root
 
     - name: UFW
       description: Setup UFW rules
@@ -60,8 +101,9 @@ Clone the repository using `git cli` or a GUI tool.
       description: Run mysql_secure_installation
       class: MysqlSecureUbuntu20
       module: mysql_secure
+      # override env variables
       env:
-        MYSQL_ROOT_PASSWORD: password
+        MYSQL_ROOT_PASSWORD: SuperSecurePassword
 
     - name: PHP7.2
       description: Install php7.2 and deps
@@ -77,80 +119,48 @@ A brick is a class that encapsulates all your logic for a step in the pipeline. 
 
 ```python
 # brick.py
-from abc import ABC
-
-
 class Brick(ABC):
-
-    _env = {}
-    _commands = []
-
-    def __init__(self, name, description, cli):
-        self.name = name
-        self.description = description
-        self.cli = cli
-
-    # ... rest methods
-
+    # ... abstract logic
 ```
 
-The base brick class defines methods to update env variables and run commands. Each of these methods can be overridden in child classes. We can make the most use of it for the `run` method (will be later shown).
+The base brick class defines methods to update env variables and run commands. Each of these methods can be overridden in child classes. We can make the most use of it for the `run` method (will be later shown). 
+
+By default the base method handles composition ,cli execution and env variable injection.
 
 Example of a child brick class:
 
 ```python
+from bricks.brick import Brick
+
+
 class MysqlSecureUbuntu20(Brick):
+    _commands = [
+        "mysql -u root -e UPDATE mysql.user SET Password=PASSWORD('{{ MYSQL_ROOT_PASSWORD }}') WHERE User='root';",
+        "mysql -u root -e DELETE FROM mysql.user WHERE User=" ";",
+        "mysql -u root -e DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');",
+        "mysql -u root -e DROP DATABASE IF EXISTS test;",
+        "mysql -u root -e DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';",
+        "mysql -u root -e FLUSH PRIVILEGES;",
+    ]
+
     _env = {"MYSQL_ROOT_PASSWORD": "password"}
 
     def __init__(self, name, description, cli):
         super(MysqlSecureUbuntu20, self).__init__(name, description, cli)
-
-    def run(self):
-        _commands = [
-            "mysql -u root -e UPDATE mysql.user SET Password=PASSWORD({}) WHERE User='root';".format(
-                self._env["MYSQL_ROOT_PASSWORD"]
-            ),
-            "mysql -u root -e DELETE FROM mysql.user WHERE User=" ";",
-            "mysql -u root -e DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');",
-            "mysql -u root -e DROP DATABASE IF EXISTS test;",
-            "mysql -u root -e DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';",
-            "mysql -u root -e FLUSH PRIVILEGES;",
-        ]
-        super(MysqlSecureUbuntu20, self).run()
-
 ```
 
-This brick contains all commands required to run `mysql_secure_installation`. Every brick should define a list of commands that they execute. They can also define a set of environment variables to use during the deployment. We see that run was overridden to defined commands using env values.
+This brick contains all commands required to run `mysql_secure_installation`. Every brick should define a list of commands that they execute. They can also define a set of environment variables to use during the deployment. Base class will overried the `MYSQL_ROOT_PASSWORD` property before executing. 
 
 Another useful thing is the brick composition. We can make bricks that use other bricks as commands.
 
 ```python
-from .brick import Brick
+# bricks/apache_mysql.py
+from bricks.brick import Brick
 from os import path, getcwd
 from utils.brick_builder import BrickBuilder
 
 
 builder = BrickBuilder()
-
-
-class MysqlUbuntu20(Brick):
-    _commands = [
-        "apt install mysql-server mysql-client -y",
-    ]
-
-    def __init__(self, name, description, cli):
-        super(MysqlUbuntu20, self).__init__(name, description, cli)
-
-
-class ApacheUbuntu20(Brick):
-    _commands = [
-        "apt install apache2 -y",
-        f'cp {path.join(path.dirname(path.realpath(__file__)), "config/apache2.conf")} /etc/apache2/apache2.conf',
-    ]
-
-    def __init__(self, name, description, cli):
-        super(ApacheUbuntu20, self).__init__(name, description, cli)
-
 
 class ApacheMysqlUbuntu20(Brick):
     _commands = [
@@ -160,6 +170,8 @@ class ApacheMysqlUbuntu20(Brick):
                 "description": "Install Apache2",
                 "module": "apache",
                 "class": "ApacheUbuntu20",
+                # "env": ...
+                # "connection": ...
             }
         ),
         builder.build(
@@ -177,7 +189,7 @@ class ApacheMysqlUbuntu20(Brick):
 
 ```
 
-Here we defined two bricks in a file we call `apache_mysql.py`, the bricks can be defined in their separate folder ofc. Using brick builder we can provide a config object to instantiate a command like we would in yml files. In our build `yml` file we would define a step:
+Here we defined a brick in the file `apache_mysql.py`, `apache` and `mysql` bricks are defined separate. Using brick builder we can provide a config object to instantiate a command like we would in `yml` files. In our build `yml` file we would define a step:
 
 ```yaml
   - name: Apache and Mysql 
@@ -186,18 +198,20 @@ Here we defined two bricks in a file we call `apache_mysql.py`, the bricks can b
     module: apache_mysql
 ```
 
-The base `run` method will determin if we are running a brick or command and based on that execute cli command or the bricks run method.
+The base `run` method will determin if we are running a brick or command and based on that execute cli command or the bricks run method. Composition, however, does not provide as much freedom as simple brick.
 
 --- 
 
 ## Usage
 <br>
 
-  1. Create all the required bricks for your set in the `bricks` folder. You can also make use of predefined bricks.
+  1. Create all the required bricks for your set in the `bricks` folder. You can also make use of predefined bricks. Also make sure to add config files and scripts if needed.
 
   2. Define a YAML file in the `builds` folder. The required part of the file is the bricks array containing the definition for all the steps in the pipeline. For each brick `name`, `description`, `class` and `module` are required. You can also define `env` variables in this file which will override and append to the base env variables in the brick.
 
-  3. Run your configuration with `python main.py --file <file>`
+  3. Activate virtualenv if it is not active
+
+  4. Run your configuration with `python main.py --file <file>`
       
       Example: `python main.py --file lamp.yml`
 
