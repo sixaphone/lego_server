@@ -15,6 +15,9 @@ class Brick(ABC):
         return f"{self.name}: {self.description}"
 
     def run(self):
+        print("===================================")
+        print("|" + str(self) + "|")
+        print("===================================")
         for step in self._commands:
             if isinstance(step, Brick):
                 step.run()
@@ -22,6 +25,7 @@ class Brick(ABC):
                 print(self.cli.run_command(step))
             else:
                 raise Exception("Unable to run step: " + str(step))
+        print("\n")
 
     def update_env(self, overrides):
         self._env = {**self._env, **overrides}
